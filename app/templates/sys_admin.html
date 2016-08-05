@@ -1,0 +1,147 @@
+{% extends "base.html"%}
+{% block content %}
+
+<script type="text/javascript">   
+    // 判断是否为IE浏览器： /msie/i.test(navigator.userAgent) 为一个简单正则
+    var isIE = /msie/i.test(navigator.userAgent) && !window.opera;
+    function chk_file(target){
+        var fileSize = 0;
+        if (isIE && !target.files) {    // IE浏览器
+            var filePath = target.value; // 获得上传文件的绝对路径
+            /**
+             * ActiveXObject 对象为IE和Opera所兼容的JS对象
+             * 用法：
+             *         var newObj = new ActiveXObject( servername.typename[, location])
+             *         其中newObj是必选项。返回 ActiveXObject对象 的变量名。
+             *        servername是必选项。提供该对象的应用程序的名称。
+             *        typename是必选项。要创建的对象的类型或类。
+             *        location是可选项。创建该对象的网络服务器的名称。
+             *\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+             *     Scripting.FileSystemObject 为 IIS 内置组件，用于操作磁盘、文件夹或文本文件，
+             *    其中返回的 newObj 方法和属性非常的多
+             *    如：var file = newObj.CreateTextFile("C:\test.txt", true) 第二个参表示目标文件存在时是否覆盖
+             *    file.Write("写入内容");    file.Close();
+             */
+            var fileSystem = new ActiveXObject("Scripting.FileSystemObject");
+            // GetFile(path) 方法从磁盘获取一个文件并返回。
+            var file = fileSystem.GetFile(filePath);
+            fileSize = file.Size;    // 文件大小，单位：b
+        }
+        else {    // 非IE浏览器
+            fileSize = target.files[0].size;
+        }
+        var size = fileSize / 1024 / 1024;
+        if (size > 5) {
+            alert("附件不能大于5M");
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+
+<script type="text/javascript">
+function check_del(){
+  if( confirm    ('确定要删除此状态吗？')){
+    return true;
+  }
+  return false;
+}
+
+$(document).ready( function () {
+  $.ajax({
+        type: "get",//使用get方法访问后台
+        dataType: "json",//返回json格式的数据
+        url: "{{ url_for('get_dict_status_json') }}",//要访问的后台地址
+        //data: "",//要发送的数据
+        //complete :function(){$("#load").hide();},//AJAX请求完成时隐藏loading提示
+        success: function(msg){//msg为返回的数据，在这里做数据绑定
+          $.each(msg.data, function(i, value){  
+            var a = document.createElement("a"); 
+            a.href = value["delete"]; 
+            a.innerHTML = value["status"] + "×"; 
+            //a.attr("href","javascript:check_del()");
+            //a.attr("onclick", function(){check_del();});
+            //a.bind('click', check_del);
+            //a.unbind('click').removeAttr('onclick').click(check_del()); 
+            //a.onclick(check_del());
+            $('#statusdiv').append(a);
+            $('#statusdiv').append("&nbsp;&nbsp;");
+          }); 
+        }
+  });
+});
+</script>
+
+<!--<h4  class="page-header">系统管理</h4> -->
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+    <tr> 
+      <th>客户数据管理</th>  
+      <th>说明</th>
+      <th>操作</th>    
+    </tr>  
+    </thead>
+    <tbody>
+    <tr>
+      <td>客户信息数据导出到EXCEL</td>
+      <td>客户信息数据导出到EXCEL</td> 
+      <td><a href="{{ url_for('docustomexport') }}">导出客户信息</a></td> 
+    </tr> 
+    <tr>
+      <td>客户信息数据清除</td>
+      <td>数据库客户数据将被全部清除！谨慎不可恢复!</td> 
+      <td><a href="{{ url_for('sys_custs_deleteall') }}" onclick="javascript:if( confirm    ('确定要清除数据库全部数据吗？')){return true;}return false;">清除所有客户信息</a></td> 
+    </tr> 
+    <tr>
+      <td>客户信息数据从EXCEL导入(xls|xlsx)<br>
+      <a href="{{ url_for ('static',filename='customer_import_example.xls')}}">EXCEL文件格式例子下载</a>
+      </td>
+      <td>请注意操作前先备份数据库数据！<br>请注意EXCEL客户信息字段是否完整。<br>文件名只能含有字母和数字。</td> 
+      <td>
+        <form name="form1" onsubmit="return chk_file(document.form1.file)" action="{{ url_for('customer_import') }}" method=post enctype=multipart/form-data>
+            <input type=file name=file><br>
+            <input type=submit value="上传excel导入客户信息到数据库">
+        </form>
+      </td> 
+    </tr>  
+    </tbody>
+  </table>
+  &nbsp;&nbsp;<p><p>
+
+   <table class="table table-striped">
+    <thead>
+    <tr> 
+      <th>字典管理</th>  
+      <th>说明</th>
+      <th>操作</th>    
+    </tr>  
+    </thead>
+    <tbody>
+    <tr>
+      <td>客户状态修改</td>
+      <td>可新增删除客户状态，点击状态删除</td>
+      <td>
+        <form name="form2" onsubmit="" action="{{ url_for('dict_status_add') }}" method=post enctype=multipart/form-data>
+            <input type=text name="status" id="status">&nbsp;&nbsp;
+            <input size="20" type="submit" name="post" value="添加状态">
+        </form><br>
+        
+        <div id="statusdiv"></div>
+
+      </td>
+    </tbody>
+  </table>  
+</div>
+
+{% endblock %}
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  $('#sysadmin-url').addClass('active');
+  {% endif %}
+{% endblock %}

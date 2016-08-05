@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row" style="height:400px">
+<div class="col-sm-2">
+</div>
+<div class="col-sm-8" align="left">
+<h4  class="alert alert-info" >欢迎使用STCRM<h4>
+</div>
+<div class="col-sm-2">
+</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  $('#home-url').addClass('active');
+  {% endif %}
+{% endblock %}

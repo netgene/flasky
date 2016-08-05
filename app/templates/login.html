@@ -1,0 +1,32 @@
+{% extends "base.html"%}
+{% block content %}
+
+<div class="row">
+<div class="col-sm-4">
+</div>
+<div class="col-sm-4" align="left">
+<form action={{ url_for('login') }}  method=post>
+<!--<h4 class="page-header">用户登录</h4>-->
+    <input type="text" name="username" id="username" class="form-control" placeholder="账号" requ="" autofocus=""><br>
+    <input type="password" name="password" id="password" class="form-control" placeholder="密码" requ=""><br>
+    <button class="btn btn-primary btn-block" type="submit">登录</button>
+</form>
+</div>
+<div class="col-sm-4">
+</div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  {% if session['logged_in']==True %}
+    $('#logout-url').addClass('active');
+  {% else %}
+    $('#login-url').addClass('active');
+  {% endif %}
+  {% endif %}
+{% endblock %}

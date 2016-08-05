@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<script src="{{ url_for ('static',filename='bootstrap-year-calendar.min.js')}}" charset="UTF-8"></script>
+<script type="text/javascript" src="{{ url_for ('static',filename='bootstrap-year-calendar.zh-CN.js')}}" charset="UTF-8"></script> 
+
+<h4>维护日历<h4>
+<div id="calendar"></div>
+
+<script type="text/javascript">
+$(function() {
+	var mcaledata = [];
+	$.ajax({
+        type: "get",//使用get方法访问后台
+        dataType: "json",//返回json格式的数据
+        url: "{{ url_for('get_mcalendar_json') }}",//要访问的后台地址
+        //data: "",//要发送的数据
+        //complete :function(){$("#load").hide();},//AJAX请求完成时隐藏loading提示
+        success: function(msg){//msg为返回的数据，在这里做数据绑定
+          //mcaledata = msg.data;
+        	$.each(msg.data, function(i, value){
+        		if(value["startDate"]=="") {return;}
+        		startval = value["startDate"];
+        		start = new Date(parseInt(startval.split('-')[0]), parseInt(startval.split('-')[1])  - 1 , parseInt(startval.split('-')[2]) );
+        		end = new Date(parseInt(startval.split('-')[0]), parseInt(startval.split('-')[1])  - 1 , parseInt(startval.split('-')[2]) );
+
+          		mcaledata.push({
+          			startDate: start,
+          			endDate: end
+          		});
+        	});
+		
+			var currentYear = new Date().getFullYear();
+      var currentMonth = new Date().getMonth();
+      var currentDay = new Date().getDate();
+      var redDateTime = new Date(currentYear, currentMonth, currentDay).getTime();
+			$('#calendar').calendar({
+				enableContextMenu: true,
+    		    enableRangeSelection: true,
+    		    language: 'zh-CN',
+    		    selectRange: function(e) {
+    		        editEvent({ startDate: e.startDate, endDate: e.endDate });
+    		    },
+    		    customDayRenderer: function(element, date) {
+    		    if(date.getTime() == redDateTime) {
+                $(element).css('background-color', 'red');
+                $(element).css('color', 'white');
+                $(element).css('border-radius', '25px');
+            }
+    		    },
+				dataSource: mcaledata
+    		});
+      	}
+  	});
+});
+</script>
+
+{% endblock %}
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  $('#cust-list-url').addClass('active');
+  {% endif %}
+{% endblock %}

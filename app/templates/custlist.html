@@ -1,0 +1,154 @@
+{% extends "base.html"%}
+{% block content %}
+
+<script src="{{ url_for ('static',filename='jquery.dataTables.js')}}"></script>
+<script src="{{ url_for ('static',filename='ColumnFilterWidgets.js')}}"></script>
+
+<!--<h4 class="page-header">客户列表</h4> -->
+<a href="{{ url_for('docustomexport') }}">导出客户信息</a>&nbsp;&nbsp;<a href="{{ url_for('get_mcalendar') }}">维护日历</a><p>
+<script type="text/javascript">
+$(document).ready( function () {
+  $('#example').dataTable({ 
+    "oLanguage" : {
+                "sLengthMenu": "每页显示 _MENU_ 条记录",
+                "sZeroRecords": "抱歉， 没有找到",
+                "sInfo": "从 _START_ 到 _END_ /共 _TOTAL_ 条数据",
+                "sInfoEmpty": "没有数据",
+                "sInfoFiltered": "(从 _MAX_ 条数据中检索)",
+                "sZeroRecords": "没有检索到数据",
+                "sSearch": "搜索:",
+                "sLoadingRecords": "正在加载数据...",  
+                "sProcessing":     "正在处理中...",  
+                "oPaginate": {
+                "sFirst": "首页",
+                "sPrevious": "前一页",
+                "sNext": "后一页",
+                "sLast": "尾页"
+                }
+                     
+            },
+      "order": [[ 16, "desc" ]],
+      "aLengthMenu": [[100, 50, 10, -1], [100, 50, 10, "全部"]],
+      //"scrollX": true,
+      "sAjaxSource":"/custlistjson",
+      "sDom": 'W<"clear">lfrtip',
+      "oColumnFilterWidgets": {
+        "aiExclude": [ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17 ]
+      },
+      "columnDefs" : [ 
+          {
+            // 定义操作列,######以下是重点########
+            "targets" : 17,//操作按钮目标列
+            "data" : null,
+            "width":"10%",
+            "render" : function(data, type, row) {
+            var html = "<a href='"+ row.link +"'>编辑</a>&nbsp;"
+            html += "<a href='"+ row.delete +"' onclick='javascript:if( confirm    (\"确定要删除此信息吗？\")){return true;}return false;'>删除</a>"
+            return html
+            }
+          },
+          {
+            "targets": [ 0 ],
+            "visible": false,
+            "searchable": false
+          },
+          {
+            "targets": [ 13 ],
+            "visible": false,
+            "searchable": false
+          },
+          {
+            "targets": [ 14 ],
+            "visible": false,
+            "searchable": false
+          },
+          {
+            "targets": [ 15 ],
+            "visible": false,
+            "searchable": false
+          },
+          {
+            "targets": [ 16 ],
+            "visible": false,
+            "searchable": false
+          }
+      ],
+      "columns": [
+          { "data": "id"},
+          { "data": "custid","width":"5%"},
+          { "data": "custname","width":"9%" },
+          { "data": "contact","width":"5%" },
+          { "data": "baseinfo","width":"23%" },
+          { "data": "address","width":"11%" },
+          { "data": "status","width":"10%" },
+          { "data": "fine","width":"2%" },
+          { "data": "content","width":"2%"  },
+          { "data": "usedbattery","width":"2%"  },
+          { "data": "memo","width":"5%" },
+          { "data": "date","width":"10%" },
+          { "data": "saleman","width":"5%" },
+          { "data": "link","width":"0%" },
+          { "data": "delete","width":"0%" },
+          { "data": "createtime","width":"0%" },
+          { "data": "updatetime","width":"0%" }
+      ]
+  });
+});
+</script>
+
+<table id="example" class="display" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+          <th>ID</th>
+          <th>客户编号</th>
+          <th>客户名称</th>
+          <th>联系方式</th>
+          <th>基本情况</th>
+          <th>地址</th>
+          <th>状态</th>
+          <th>罚款</th>
+          <th>容量</th>
+          <th>用电量</th>
+          <th>备注</th>
+          <th>日期</th>
+          <th>业务员</th>
+          <th>link</th>
+          <th>delete</th>
+          <th>创建时间</th>
+          <th>更新时间</th>
+          <th>操作</th>
+      </tr>
+  </thead>
+  <tfoot>
+      <tr>
+          <th>ID</th>
+          <th>客户编号</th>
+          <th>客户名称</th>
+          <th>联系方式</th>
+          <th>基本情况</th>
+          <th>地址</th>
+          <th>状态</th>
+          <th>罚款</th>
+          <th>容量</th>
+          <th>用电量</th>
+          <th>备注</th>
+          <th>日期</th>
+          <th>业务员</th>
+          <th>link</th>
+          <th>delete</th>
+          <th>创建时间</th>
+          <th>更新时间</th>
+          <th>操作</th>
+      </tr>
+  </tfoot>
+</table>
+
+{% endblock %}
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  $('#cust-list-url').addClass('active');
+  {% endif %}
+{% endblock %}

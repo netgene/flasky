@@ -1,0 +1,144 @@
+{% extends "base.html"%}
+{% block content %}
+
+<script type="text/javascript" src="{{ url_for ('static',filename='bootstrap-datepicker.js')}}"  charset="UTF-8"></script>
+<script type="text/javascript" src="{{ url_for ('static',filename='bootstrap-datepicker.zh-CN.min.js')}}" charset="UTF-8"></script> 
+
+<script language="javascript" type="text/javascript">
+function chk_field()
+{
+	if(document.form1.custid.value =="")
+	{
+		alert("客户编号不能为空!");
+		return false;
+	}
+	if(document.form1.custname.value =="")
+	{
+		alert("客户名称不能为空!");
+		return false;
+	}else if(document.form1.contact.value =="")
+	{
+		alert("联系方式不能为空!");
+		return false;
+	}else if(document.form1.status.value =="")
+	{
+		alert("状态不能为空!");
+		return false;
+	}else
+	{
+		document.form1.submit();
+	}
+
+}
+</script>
+
+<div class="row">
+<div class="col-sm-2">
+</div>
+<div class="col-sm-8" align="left">
+<!--<h4 class="page-header">客户登记</h4> -->
+<form action={{ url_for ('submit_custinfo') }} method=post name="form1" onsubmit="return chk_field()">
+<div width="760px" align="left">
+<input type="hidden" name="id" size="20" value="{{ value[0].id }}">
+<p>*客户编号:&nbsp;<input type="text" name="custid" size="30" value="{{ value[0].custid }}"><br>
+<p>*客户名称:&nbsp;<input type="text" name="custname" size="50" value="{{ value[0].custname }}"><br>
+<p>*联系方式:&nbsp;<input type="text" name="contact" size="60" value="{{ value[0].contact }}"><br>
+<p>&nbsp;基本情况:&nbsp;<textarea name="baseinfo" cols="70" rows="4">{{ value[0].baseinfo }}
+</textarea><br>
+<p>&nbsp;客户地址:&nbsp;<input type="text" name="address" size="70" value="{{ value[0].address }}"><br>
+<p>*客户状态:
+<select name="status" id="status">
+
+</select> 
+<br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;罚款:&nbsp;<input type="text" name="fine" size="20" value="{{ value[0].fine }}"><br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;容量:&nbsp;<input type="text" name="content" size="20" value="{{ value[0].content }}"><br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;用电量:&nbsp;<input type="text" name="usedbattery" size="20" value="{{ value[0].usedbattery }}"><br>
+<p>&nbsp;&nbsp;备注信息:<textarea name="memo" cols="70" rows="4">{{ value[0].memo }}
+</textarea><br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日期:
+<input name="date" size="20" type="text" id="datepicker" value="{{ value[0].date }}">&nbsp;&nbsp;
+{% if value[0].createtime !='' %}&nbsp;创建时间:{{ value[0].createtime }}&nbsp;&nbsp;{% endif %}
+{% if value[0].updatetime !='' %}&nbsp;更新时间:{{ value[0].updatetime }}&nbsp;&nbsp;{% endif %}
+<br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;业务员:&nbsp;<input type="text" name="saleman" size="20" value="{{ value[0].saleman }}"><br>
+&nbsp;&nbsp;<p>
+<input size="50" type="submit" name="post" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;提交客户信息&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"><p><br>
+</div>
+</form>
+</div>
+<div class="col-sm-2">
+</div>
+</div>
+<script type="text/javascript">
+function check_del(){
+  if( confirm    ('确定要删除此状态吗？')){
+    return true;
+  }
+  return false;
+}
+
+$(document).ready( function () {
+  $.ajax({
+        type: "get",//使用get方法访问后台
+        dataType: "json",//返回json格式的数据
+        url: "{{ url_for('get_dict_status_json') }}",//要访问的后台地址
+        //data: "",//要发送的数据
+        //complete :function(){$("#load").hide();},//AJAX请求完成时隐藏loading提示
+        success: function(msg){//msg为返回的数据，在这里做数据绑定
+          $.each(msg.data, function(i, value){  
+            var opt = document.createElement("option"); 
+            opt.text = value["status"]; 
+            opt.innerHTML  = value["status"]; 
+            $('#status').append(opt);
+          });
+          //$('#status option:eq("已看现场")').attr('selected', 'selected');
+          $('#status').val("{{ value[0].status }}");
+        }
+  });
+});
+</script>
+
+<script type="text/javascript">
+    function today(){//构建方法
+        var today=new Date();//new 出当前时间
+        var h=today.getFullYear();//获取年
+        var m=today.getMonth()+1;//获取月
+        m = m < 10 ? "0" + m : m;
+        var d=today.getDate();//获取日
+        d = d < 10 ? "0" + d : d;
+        var H = today.getHours();//获取时
+        H = H < 10 ? "0" + H : H;
+        var M = today.getMinutes();//获取分
+        M = M < 10 ? "0" + M : M;
+        var S = today.getSeconds();//获取秒
+        S = S < 10 ? "0" + S : S;
+        return h+"-"+m+"-"+d;
+}
+{% if value[0].date =='' %} 
+document.getElementById("datepicker").value = '';
+{% endif %}
+</script>
+
+<script type="text/javascript">  
+$('#datepicker').datepicker({
+    format: "yyyy-mm-dd",
+    startView: 0,
+    todayBtn: true,
+    language: "zh-CN",
+    autoclose: true,
+    todayHighlight: true
+});
+</script> 
+
+{% endblock %}
+
+
+{% block js %}
+  {% if active_url %}
+    $('#{{ active_url }}').addClass('active');
+  {% else %}
+  $('#cust-post-url').addClass('active');
+  {% endif %}
+{% endblock %}
+
